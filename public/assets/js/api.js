@@ -1,4 +1,18 @@
 /* ===================== shared helpers ===================== */
+/* Backend base URL.
+   Default = jis host se page serve ho raha hai — matlab:
+     local  -> http://localhost:3000
+     live   -> https://keyauth-website-eg3o.onrender.com
+   (frontend isi Render service par hai, to URL apne aap sahi aata hai)
+
+   Agar frontend kisi ALAG host par host karna ho to <head> me ye likhein:
+     <script>window.APEX_API_BASE = 'https://keyauth-website-eg3o.onrender.com';</script>
+   Ya turant test ke liye URL me:
+     app.html?api=https://keyauth-website-eg3o.onrender.com                     */
+const API_BASE = String(
+  new URLSearchParams(location.search).get('api') || window.APEX_API_BASE || ''
+).replace(/\/+$/, '') || location.origin;
+
 const API = {
   token: localStorage.getItem('bk_token') || '',
   setToken(t) { this.token = t || ''; t ? localStorage.setItem('bk_token', t) : localStorage.removeItem('bk_token'); },
@@ -7,7 +21,7 @@ const API = {
     if (this.token) opt.headers['Authorization'] = 'Bearer ' + this.token;
     if (body !== undefined) opt.body = JSON.stringify(body);
     let res, data;
-    try { res = await fetch(path, opt); }
+    try { res = await fetch(API_BASE + path, opt); }
     catch { throw new Error('Network error — server not reachable'); }
     try { data = await res.json(); }
     catch { data = { ok: false, error: 'Bad response (' + res.status + ')' }; }
